@@ -136,7 +136,9 @@
         startScrollTop: 0,
         currentY: 0,
         topStatus: '',
-        bottomStatus: ''
+        bottomStatus: '',
+        bottomHeight: 50,
+        callEvent: ''
       };
     },
 
@@ -190,10 +192,11 @@
         this.bottomStatus = 'pull';
         this.bottomDropped = false;
         this.$nextTick(() => {
+          let _offset = this.callEvent === 'autoFill' ? 0 : this.bottomHeight;
           if (this.scrollEventTarget === window) {
-            document.body.scrollTop += 50;
+            document.body.scrollTop += _offset;
           } else {
-            this.scrollEventTarget.scrollTop += 50;
+            this.scrollEventTarget.scrollTop += _offset;
           }
           this.translate = 0;
         });
@@ -235,11 +238,19 @@
         this.topText = this.topPullText;
         this.scrollEventTarget = this.getScrollEventTarget(this.$el);
         if (typeof this.bottomMethod === 'function') {
+          this.calcBottomHeight();
           this.fillContainer();
           this.bindTouchEvents();
         }
         if (typeof this.topMethod === 'function') {
           this.bindTouchEvents();
+        }
+      },
+
+      calcBottomHeight() {
+        let bottom = document.querySelector('.mint-loadmore-bottom');
+        if (bottom) {
+          this.bottomHeight = bottom.offsetHeight;
         }
       },
 
@@ -255,6 +266,7 @@
             }
             if (!this.containerFilled) {
               this.bottomStatus = 'loading';
+              this.callEvent = 'autoFill';
               this.bottomMethod();
             }
           });
@@ -268,7 +280,7 @@
            */
           return document.documentElement.scrollTop || document.body.scrollTop + document.documentElement.clientHeight >= document.body.scrollHeight;
         } else {
-          return parseInt(this.$el.getBoundingClientRect().bottom) <= parseInt(this.scrollEventTarget.getBoundingClientRect().bottom) + 1;
+          return parseInt(this.$el.getBoundingClientRect().bottom, 10) <= parseInt(this.scrollEventTarget.getBoundingClientRect().bottom, 10) + 1;
         }
       },
 
@@ -345,8 +357,9 @@
           this.bottomDropped = true;
           this.bottomReached = false;
           if (this.bottomStatus === 'drop') {
-            this.translate = '-50';
+            this.translate = String(-this.bottomHeight);
             this.bottomStatus = 'loading';
+            this.callEvent = 'touchEnd';
             this.bottomMethod();
           } else {
             this.translate = '0';
