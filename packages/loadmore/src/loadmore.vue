@@ -137,8 +137,7 @@
         currentY: 0,
         topStatus: '',
         bottomStatus: '',
-        bottomHeight: 50,
-        callEvent: ''
+        bottomHeight: 50
       };
     },
 
@@ -192,7 +191,7 @@
         this.bottomStatus = 'pull';
         this.bottomDropped = false;
         this.$nextTick(() => {
-          let _offset = this.callEvent === 'autoFill' ? 0 : this.bottomHeight;
+          let _offset = -this.translate;
           if (this.scrollEventTarget === window) {
             document.body.scrollTop += _offset;
           } else {
@@ -200,7 +199,7 @@
           }
           this.translate = 0;
         });
-        if (!this.bottomAllLoaded && !this.containerFilled) {
+        if (!this.bottomAllLoaded) {
           this.fillContainer();
         }
       },
@@ -266,7 +265,6 @@
             }
             if (!this.containerFilled) {
               this.bottomStatus = 'loading';
-              this.callEvent = 'autoFill';
               this.bottomMethod();
             }
           });
@@ -359,7 +357,6 @@
           if (this.bottomStatus === 'drop') {
             this.translate = String(-this.bottomHeight);
             this.bottomStatus = 'loading';
-            this.callEvent = 'touchEnd';
             this.bottomMethod();
           } else {
             this.translate = '0';
